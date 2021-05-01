@@ -28,7 +28,7 @@ void *producer(void *arg)
     int *ntasks = (int *)arg;
     for ( int i = 0; i < *ntasks; ++i ) {
       pthread_mutex_lock(&mutex);
-      if(counter==1) {
+      while(counter==1) {
         pthread_cond_wait(&cond, &mutex);
       }
       put(i);
@@ -43,7 +43,7 @@ void *consumer(void *arg)
     int *ntasks = (int *) arg;
     for ( int i = 0; i < *ntasks; ++i ) {
       pthread_mutex_lock(&mutex);
-      if(counter==0) {
+      while(counter==0) {
         pthread_cond_wait(&cond, &mutex);
       }
       printf("get: %d\n", get());
