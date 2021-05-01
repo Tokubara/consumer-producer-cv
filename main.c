@@ -5,6 +5,9 @@
 int buffer;
 int counter = 0; // initially, empty
 
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 void put(int value)
 {
     assert(counter == 0);
@@ -23,17 +26,29 @@ int get()
 void *producer(void *arg)
 {
     int *ntasks = (int *)arg;
-    for ( int i = 0; i < *ntasks; ++i )
-        put(i);
+    for ( int i = 0; i < *ntasks; ++i ) {
+      pthread_mutex_lock(&mutex);
+      if(counter==1) {
+        pthread_cond_wait(&cond, &mutex);
+      }
+      put(i);
+      pthread_cond_signal(&cond);
+      pthread_mutex_unlock(&mutex);
+    }
     return NULL;
 }
 
 void *consumer(void *arg)
 {
     int *ntasks = (int *) arg;
-    for ( int i = 0; i < *ntasks; ++i )
-    {
-        printf("get: %d\n", get());
+    for ( int i = 0; i < *ntasks; ++i ) {
+      pthread_mutex_lock(&mutex);
+      if(counter==0) {
+        pthread_cond_wait(&cond, &mutex);
+      }
+      printf("get: %d\n", get());
+      pthread_cond_signal(&cond);
+      pthread_mutex_unlock(&mutex);
         // do something
     }
     return NULL;
