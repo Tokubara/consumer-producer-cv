@@ -32,7 +32,7 @@ void *producer(void *arg)
         pthread_cond_wait(&cond, &mutex);
       }
       put(i);
-      pthread_cond_signal(&cond);
+      pthread_cond_broadcast(&cond);
       pthread_mutex_unlock(&mutex);
     }
     return NULL;
@@ -47,7 +47,7 @@ void *consumer(void *arg)
         pthread_cond_wait(&cond, &mutex);
       }
       printf("get: %d\n", get());
-      pthread_cond_signal(&cond);
+      pthread_cond_broadcast(&cond);
       pthread_mutex_unlock(&mutex);
         // do something
     }
